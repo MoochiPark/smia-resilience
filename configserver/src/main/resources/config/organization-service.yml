@@ -1,8 +1,5 @@
-example:
-  property: I AM THE DEFAULT
-
 server:
-  port: 8082
+  port: 8081
 
 spring:
   datasource:
