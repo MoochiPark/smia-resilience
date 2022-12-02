@@ -18,6 +18,12 @@ spring:
     allow-circular-references: true
 
 management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
   endpoints:
     web:
       exposure:
@@ -32,3 +38,61 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://localhost:8070/eureka
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      # 라이선싱 서비스의 인스턴스 구성(@CircuitBreaker에 전달되는 name과 동일)
+      licenseService:
+        # 상태 정보 엔드포인트에 대한 구성 정보 노출 여부를 설정
+        register-health-indicator: true
+        # 회로 차단기가 닫힘 상태일 때 링 비트 버퍼의 크기를 설정
+        ring-buffer-size-in-closed-state: 5
+        # 회로 차단기가 반열림 상태일 때 링 비트 버퍼의 크기를 설정
+        ring-buffer-size-in-half-open-state: 3
+        # 열린 상태에서 반열린 상태로 변경하기 전 회로 차단기가 대기해야 할 시간. 기본값 60s
+        wait-duration-in-open-state: 10s
+        # 실패율 임계치의 백분율 설정. 임계치보다 크거나 같을 때 열린 상태로 변경. 기본값 50
+        failure-rate-threshold: 20
+        # 실패로 간주될 예외를 나열. 기본값으로는 모든 예외를 실패로 기록함
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+
+  bulkhead:
+    instances:
+      bulkheadLicenseService:
+        max-wait-duration: 10ms
+        max-concurrent-calls: 20
+
+  thread-pool-bulkhead:
+    instances:
+      bulkheadLicenseService:
+        max-thread-pool-size: 1
+        core-thread-pool-size: 1
+        queue-capacity: 1
+        keep-alive-duration: 20ms
+
+  retry:
+    instances:
+      retryLicenseService:
+        # 재시도 최대 횟수
+        max-retry-attempts: 2
+        # 재시도 간 대기 시간 (ms)
+        wait-duration: 5000
+        # 재시도 대상이 되는 예외 목록
+        retry-exceptions:
+          - java.util.concurrent.TimeoutException
+
+  ratelimiter:
+    instances:
+      licensesService:
+        # 스레드가 허용을 기다리는 시간을 정의
+        timeout-duration: 1000ms
+        # 사이클의 갱신 주기를 정의
+        limit-refresh-period: 5000
+        # 갱신 주기 동안 가용한 스레드 허용 수를 정의
+        limit-for-period: 5
+# https://resilience4j.readme.io/docs/circuitbreaker 에서 더 많은 구성 정보 확인 가능

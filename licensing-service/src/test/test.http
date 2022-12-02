@@ -1,0 +1,13 @@
+POST http://localhost:8082/v1/organization/daewon/license
+Content-Type: application/json
+
+{
+  "licenseId": "1234",
+  "organizationId": "daewon",
+  "description": "Software product",
+  "productName": "O-stock",
+  "licenseType": "complete"
+}
+
+###
+GET http://localhost:8082/v1/organization/daewon/license

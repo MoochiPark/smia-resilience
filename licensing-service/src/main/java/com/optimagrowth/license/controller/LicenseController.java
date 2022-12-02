@@ -2,8 +2,12 @@ package com.optimagrowth.license.controller;
 
 import com.optimagrowth.license.model.License;
 import com.optimagrowth.license.service.LicenseService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -12,30 +16,40 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/v1/organization/{organizationId}/license")
 public class LicenseController {
 
-  private final LicenseService licenseService;
+    private final LicenseService licenseService;
 
-  public LicenseController(final LicenseService licenseService) {
-    this.licenseService = licenseService;
-  }
+    public LicenseController(final LicenseService licenseService) {
+        this.licenseService = licenseService;
+    }
 
-  @GetMapping("/{licenseId}")
-  public ResponseEntity<License> getLicense(
-      @PathVariable("organizationId") final String organizationId,
-      @PathVariable("licenseId") final String licenseId
-  ) {
-    final License license = this.licenseService.getLicense(licenseId, organizationId);
+    @GetMapping
+    public ResponseEntity<List<License>> getLicensesOrganization(
+            @PathVariable("organizationId") final String organizationId
+    ) throws TimeoutException {
+        return ResponseEntity.ok(
+                licenseService.getLicensesByOrganization(organizationId)
+        );
+    }
 
-    return ResponseEntity.ok(license);
-  }
+    @GetMapping("/{licenseId}")
+    public ResponseEntity<License> getLicense(
+            @PathVariable("organizationId") final String organizationId,
+            @PathVariable("licenseId") final String licenseId
+    ) {
+        final License license = this.licenseService.getLicense(licenseId, organizationId);
 
-  @PostMapping
-  public ResponseEntity<License> createLicense(
-      @PathVariable("organizationId") final String organizationId,
-      @RequestBody final License license
-  ) {
-    return ResponseEntity
-        .status(CREATED)
-        .body(this.licenseService.createLicense(license));
-  }
+        return ResponseEntity.ok(license);
+    }
+
+
+    @PostMapping
+    public ResponseEntity<License> createLicense(
+            @PathVariable("organizationId") final String organizationId,
+            @RequestBody final License license
+    ) {
+        return ResponseEntity
+                .status(CREATED)
+                .body(this.licenseService.createLicense(license));
+    }
 
 }
