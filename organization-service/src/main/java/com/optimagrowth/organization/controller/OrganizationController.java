@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("/v1/organization")
 public class OrganizationController {
@@ -32,7 +34,10 @@ public class OrganizationController {
 
     @PostMapping
     public ResponseEntity<Organization> create(@RequestBody Organization organization) {
-        return ResponseEntity.ok(service.create(organization));
+        final Organization response = service.create(organization);
+        return ResponseEntity
+                .created(URI.create("/v1/organization/" + response.getId()))
+                .body(response);
     }
 
     @RequestMapping(value = "/{organizationId}", method = RequestMethod.DELETE)

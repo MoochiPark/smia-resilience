@@ -9,12 +9,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Getter
 @Setter
 @ToString
 @Entity
-@Table(name = "licenses")
+@Table(name = "license")
 public class License extends RepresentationModel<License> {
 
   @Id
@@ -34,6 +35,18 @@ public class License extends RepresentationModel<License> {
 
   @Column(name = "comment")
   private String comment;
+
+  @Transient
+  private String organizationName;
+
+  @Transient
+  private String contactName;
+
+  @Transient
+  private String contactEmail;
+
+  @Transient
+  private String contactPhone;
 
   public License withComment(final String comment) {
     this.setComment(comment);

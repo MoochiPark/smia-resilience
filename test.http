@@ -23,3 +23,41 @@ Accept: application/json
 GET http://localhost:8070/eureka/apps/licensing-service
 Content-Type: application/json
 Accept: application/json
+
+###
+POST http://localhost:8081/v1/organization
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "optima growth",
+  "contactName": "홍길동",
+  "contactEmail": "hgd@wisoft.io",
+  "contactPhone": "010-1213-1212"
+}
+
+> {% client.global.set("organizationId", response.body.id); %}
+
+###
+GET http://localhost:8081/v1/organization/{{organizationId}}
+Content-Type: application/json
+
+###
+POST http://localhost:8082/v1/organization/{{organizationId}}/license
+Content-Type: application/json
+Accept: application/json
+
+{
+  "licenseId": "1234",
+  "organizationId": "{{organizationId}}",
+  "description": "설명",
+  "productName": "제품",
+  "licenseType": "일반"
+}
+
+> {% client.global.set("licenseId", response.body.licenseId); %}
+
+###
+GET http://localhost:8082/v1/organization/{{organizationId}}/license/{{licenseId}}
+Content-Type: application/json
+Accept: application/json
