@@ -61,3 +61,24 @@ Accept: application/json
 GET http://localhost:8082/v1/organization/{{organizationId}}/license/{{licenseId}}
 Content-Type: application/json
 Accept: application/json
+
+###
+POST http://localhost:8082/v1/organization/daewon/license
+Content-Type: application/json
+Accept: application/json
+
+{
+  "licenseId": "1234",
+  "organizationId": "daewon",
+  "description": "설명",
+  "productName": "제품",
+  "licenseType": "일반"
+}
+
+### 3분의 1 확률로 실패하는 조회 요청
+GET http://localhost:8082/v1/organization/daewon/license
+Content-Type: application/json
+Accept: application/json
+
+### 회로 차단기 상태 조회
+GET http://localhost:8082/actuator/health

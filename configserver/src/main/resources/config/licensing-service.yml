@@ -18,6 +18,12 @@ spring:
     allow-circular-references: true
 
 management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
   endpoints:
     web:
       exposure:
@@ -32,3 +38,45 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://localhost:8070/eureka
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      licenseService:
+        register-health-indicator: true
+        ring-buffer-size-in-closed-state: 5
+        ring-buffer-size-in-half-open-state: 3
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 20
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+
+  bulkhead:
+    instances:
+      bulkheadLicenseService:
+        max-wait-duration: 10ms
+        max-concurrent-calls: 20
+
+  thread-pool-bulkhead:
+    instances:
+      bulkheadLicenseService:
+        max-thread-pool-size: 1
+        core-thread-pool-size: 1
+        queue-capacity: 1
+        keep-alive-duration: 20ms
+
+  retry:
+    instances:
+      retryLicenseService:
+        max-retry-attempts: 2
+        wait-duration: 5000
+        retry-exceptions:
+          - java.util.concurrent.TimeoutException
+
+  ratelimiter:
+    instances:
+      licenseService:
+        timeout-duration: 1000ms
+        limit-refresh-period: 5000
+        limit-for-period: 5
